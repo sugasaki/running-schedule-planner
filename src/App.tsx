@@ -1,9 +1,9 @@
-import RunningScheduleCalculator from './RunningScheduleCalculator';
+import RunningSchedulePlanner from './RunningSchedulePlanner';
 
 function App() {
   return (
     <div className="min-h-screen bg-white">
-      <RunningScheduleCalculator />
+      <RunningSchedulePlanner />
     </div>
   );
 }
