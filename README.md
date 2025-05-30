@@ -1,57 +1,124 @@
-# React + TypeScript + Vite
+# ランニングスケジュールプランナー
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ランニングイベントのチェックポイント管理と時間計算を行うWebアプリケーションです。
 
-Currently, two official plugins are available:
+## 機能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 📍 チェックポイント管理
+- チェックポイントの追加・編集・削除
+- ドラッグ&ドロップによる順序変更
+- 場所名、区分（集合、スタート、ゴール等）の設定
 
-## Expanding the ESLint configuration
+### ⏱️ 時間計算
+- スタート日時の設定
+- 各チェックポイントの到着・出発時刻を自動計算
+- 距離とペースに基づく移動時間算出
+- 休憩時間の考慮
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 📊 データ管理
+- 距離、ペース、間隔、休憩時間の個別設定
+- エラーチェック（前のチェックポイントより距離が小さい場合）
+- 総距離と推定総時間の表示
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### 🎛️ インターフェース
+- ドラッグ&ドロップによる列の並び替え
+- 列幅のリサイズ機能
+- レスポンシブデザイン
+
+## 技術スタック
+
+- **フロントエンド**: React 18 + TypeScript
+- **ビルドツール**: Vite
+- **スタイリング**: Tailwind CSS
+- **ドラッグ&ドロップ**: @dnd-kit/core
+- **アイコン**: Lucide React
+
+## アーキテクチャ
+
+### コンポーネント構成
+```
+src/
+├── components/
+│   ├── ScheduleTable.tsx      # メインテーブルコンポーネント
+│   ├── SortableRow.tsx        # ドラッグ可能な行コンポーネント
+│   └── DraggableColumn.tsx    # ドラッグ可能な列ヘッダー
+├── hooks/
+│   └── useTimeCalculations.ts # 時間計算カスタムフック
+├── utils/
+│   └── timeUtils.ts           # 時間フォーマット関数
+├── types.ts                   # TypeScript型定義
+└── RunningSchedulePlanner.tsx # メインコンポーネント
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 設計思想
+- **コンポーネント分割**: 機能ごとに独立したコンポーネント
+- **型安全性**: TypeScriptによる厳密な型チェック
+- **再利用性**: 依存関係を最小化した設計
+- **保守性**: 責任の明確な分離
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## セットアップ
 
-export default tseslint.config({
-  extends: [
-    // other configs...
-    // Enable lint rules for React
-    reactX.configs['recommended-typescript'],
-    // Enable lint rules for React DOM
-    reactDom.configs.recommended,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### 前提条件
+- Node.js (推奨: v18以上)
+- pnpm (推奨) または npm
+
+### インストール
+```bash
+# リポジトリのクローン
+git clone https://github.com/sugasaki/running-schedule-planner.git
+cd running-schedule-planner
+
+# 依存関係のインストール
+pnpm install
+# または
+npm install
 ```
+
+### 開発サーバーの起動
+```bash
+pnpm dev
+# または
+npm run dev
+```
+
+### ビルド
+```bash
+pnpm build
+# または
+npm run build
+```
+
+### プレビュー
+```bash
+pnpm preview
+# または
+npm run preview
+```
+
+## 使い方
+
+1. **スタート日時の設定**: 画面上部でイベントの開始日時を設定
+2. **チェックポイントの編集**: テーブル内で各項目を直接編集
+3. **チェックポイントの追加**: 「チェックポイント追加」ボタンで新規追加
+4. **順序の変更**: 行の左端のグリップアイコンをドラッグして並び替え
+5. **列の調整**: 列ヘッダーのグリップアイコンで順序変更、右端で幅調整
+
+### 入力項目
+- **場所**: チェックポイントの名称
+- **区分**: 集合、スタート、ゴール等の種別
+- **距離**: 累積距離（km）
+- **ペース**: 移動ペース（分/km）
+- **間隔**: 前のチェックポイントからの距離（自動計算）
+- **休憩**: 休憩時間（分）
+
+## ライセンス
+
+MIT License
+
+## 貢献
+
+プルリクエストやイシューは歓迎します。大きな変更を行う前に、まずイシューを作成して議論することをお勧めします。
+
+## 作者
+
+Created with [Claude Code](https://claude.ai/code)
