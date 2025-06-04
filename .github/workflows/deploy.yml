@@ -36,6 +36,9 @@ jobs:
         
       - name: Build
         run: pnpm run build
+        env:
+          NODE_ENV: production
+          PUBLIC_URL: /running-schedule-planner/
         
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
