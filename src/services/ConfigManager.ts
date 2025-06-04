@@ -23,7 +23,8 @@ export class ConfigManager {
     private static async loadDefaultPresets(): Promise<void> {
         try {
             // プリセットインデックスファイルを読み込み
-            const indexResponse = await fetch('/presets/presets-index.json');
+            const baseUrl = import.meta.env.BASE_URL || '/';
+            const indexResponse = await fetch(`${baseUrl}presets/presets-index.json`);
             if (!indexResponse.ok) {
                 throw new Error(`HTTP error! status: ${indexResponse.status}`);
             }
@@ -31,9 +32,11 @@ export class ConfigManager {
 
             // 各プリセットファイルを並列で読み込み
             const presetPromises = index.presets.map(async (presetPath: string) => {
-                const response = await fetch(presetPath);
+                // presetPathが相対パスの場合、baseUrlを追加
+                const fullPath = presetPath.startsWith('/') ? `${baseUrl}${presetPath.slice(1)}` : `${baseUrl}${presetPath}`;
+                const response = await fetch(fullPath);
                 if (!response.ok) {
-                    throw new Error(`Failed to load preset: ${presetPath}`);
+                    throw new Error(`Failed to load preset: ${fullPath}`);
                 }
                 return await response.json();
             });

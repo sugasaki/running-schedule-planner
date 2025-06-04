@@ -210,6 +210,29 @@ pnpm type-check
 - **特徴**: 10K完走を目指すトレーニングプラン
 - **所要時間**: 約1時間
 
+## デプロイメント
+
+### GitHub Pages
+このプロジェクトはGitHub Actionsを使用してGitHub Pagesに自動デプロイされます。
+
+#### 自動デプロイ
+- `main`ブランチにプッシュすると自動的にデプロイされます
+- ワークフローファイル: `.github/workflows/deploy.yml`
+- デプロイURL: `https://[username].github.io/running-schedule-planner/`
+
+#### 手動デプロイ
+```bash
+# プロジェクトをビルド
+pnpm run build
+
+# GitHub Pagesにプッシュ（例）
+# gh-pagesブランチへのデプロイツールを使用
+```
+
+#### 設定
+- Vite設定で`base: '/running-schedule-planner/'`を指定
+- 静的アセット（プリセットファイル）のパスも自動調整
+
 ## ライセンス
 
 MIT License
