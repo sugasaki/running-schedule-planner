@@ -151,17 +151,6 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
     });
   };
 
-  const getRowClassName = (row: number) => {
-    const checkpoint = checkpoints[row];
-    if (!checkpoint) return '';
-
-    if (checkpoint.hasError) return 'has-error';
-    if (checkpoint.type === 'ゴール') return 'goal-row';
-    if (checkpoint.type === '集合') return 'meeting-row';
-    if (checkpoint.type === 'スタート') return 'start-row';
-    return '';
-  };
-
   return (
     <div className="handsontable-container relative z-10">
       <style>{`
@@ -176,31 +165,27 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           background-color: #ffffff !important;
         }
         
-        .handsontable-container .handsontable tbody tr td {
-          background-color: #ffffff !important;
-        }
-        
-        /* ヘッダーも白にする場合 */
+        /* ヘッダーの背景色 */
         .handsontable-container .handsontable .ht_clone_top th,
         .handsontable-container .handsontable .ht_clone_left th,
         .handsontable-container .handsontable .ht_clone_corner th {
           background-color: #f9fafb !important;
         }
         
-        /* 区分に応じた行の背景色 - より高い優先度で設定 */
-        .handsontable-container .handsontable tbody tr.has-error td {
+        /* 区分に応じたセルの背景色 - セル単位で適用 */
+        .handsontable-container .handsontable td.has-error {
           background-color: #fef2f2 !important;
         }
         
-        .handsontable-container .handsontable tbody tr.goal-row td {
+        .handsontable-container .handsontable td.goal-row {
           background-color: #fefce8 !important;
         }
         
-        .handsontable-container .handsontable tbody tr.meeting-row td {
+        .handsontable-container .handsontable td.meeting-row {
           background-color: #f0fdf4 !important;
         }
         
-        .handsontable-container .handsontable tbody tr.start-row td {
+        .handsontable-container .handsontable td.start-row {
           background-color: #eff6ff !important;
         }
         
@@ -210,20 +195,20 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           color: #6b7280 !important;
         }
         
-        /* 区分行の読み取り専用セルも適切な背景色を維持 */
-        .handsontable-container .handsontable tbody tr.goal-row td.htDimmed {
+        /* 区分別 + 読み取り専用セルの組み合わせ */
+        .handsontable-container .handsontable td.goal-row.htDimmed {
           background-color: #fef3c7 !important;
         }
         
-        .handsontable-container .handsontable tbody tr.meeting-row td.htDimmed {
+        .handsontable-container .handsontable td.meeting-row.htDimmed {
           background-color: #dcfce7 !important;
         }
         
-        .handsontable-container .handsontable tbody tr.start-row td.htDimmed {
+        .handsontable-container .handsontable td.start-row.htDimmed {
           background-color: #dbeafe !important;
         }
         
-        .handsontable-container .handsontable tbody tr.has-error td.htDimmed {
+        .handsontable-container .handsontable td.has-error.htDimmed {
           background-color: #fee2e2 !important;
         }
       `}</style>
@@ -279,10 +264,31 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           // 列移動後の処理
           console.log('Column moved:', columns, 'to', target);
         }}
-        cells={(row: number) => {
-          const className = getRowClassName(row);
+        cells={(row: number, col: number) => {
+          const checkpoint = checkpoints[row];
+          if (!checkpoint) return {};
+
+          let className = '';
+          
+          // 区分に応じたクラス名を追加
+          if (checkpoint.hasError) {
+            className += 'has-error ';
+          } else if (checkpoint.type === 'ゴール') {
+            className += 'goal-row ';
+          } else if (checkpoint.type === '集合') {
+            className += 'meeting-row ';
+          } else if (checkpoint.type === 'スタート') {
+            className += 'start-row ';
+          }
+
+          // 読み取り専用列にhtDimmedクラスを追加
+          const readOnlyColumns = [5, 7, 8, 9]; // 間隔、日付、到着、出発
+          if (readOnlyColumns.includes(col)) {
+            className += 'htDimmed ';
+          }
+
           return {
-            className,
+            className: className.trim(),
           };
         }}
       />
