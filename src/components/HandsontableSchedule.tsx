@@ -171,6 +171,22 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           z-index: 10;
         }
         
+        /* グリッドの基本背景を白に設定 */
+        .handsontable-container .handsontable td {
+          background-color: #ffffff !important;
+        }
+        
+        .handsontable-container .handsontable tbody tr td {
+          background-color: #ffffff !important;
+        }
+        
+        /* ヘッダーも白にする場合 */
+        .handsontable-container .handsontable .ht_clone_top th,
+        .handsontable-container .handsontable .ht_clone_left th,
+        .handsontable-container .handsontable .ht_clone_corner th {
+          background-color: #f9fafb !important;
+        }
+        
         .has-error {
           background-color: #fef2f2 !important;
         }
