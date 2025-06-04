@@ -54,8 +54,12 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
     {
       title: '区分',
       data: 2,
-      type: 'text',
+      type: 'dropdown',
+      source: ['', '集合', 'スタート', 'コンビニ', '観光', '休憩', 'ゴール', '銭湯', '打上げ'],
       width: 100,
+      strict: false,
+      allowInvalid: false,
+      className: 'htCenter',
     },
     {
       title: '距離(km)',

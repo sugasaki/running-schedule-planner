@@ -47,19 +47,39 @@ const RunningSchedulePlanner = () => {
   useEffect(() => {
     setStartDateTime(currentConfig.startDateTime);
     setCheckpoints(currentConfig.checkpoints);
-  }, [currentConfig]);
+  }, [currentConfig.id]); // idが変わった時のみ更新（プリセット切り替え時）
+
+  // checkpointsまたはstartDateTimeが変更されたときにcurrentConfigを更新
+  // ただし、プリセット読み込み中は更新しない
+  useEffect(() => {
+    if (isInitialized && currentConfig.id) {
+      // プリセットのデータと現在のstateが異なる場合のみ更新
+      const currentCheckpointsStr = JSON.stringify(checkpoints.map(cp => ({
+        id: cp.id, name: cp.name, type: cp.type, distance: cp.distance,
+        pace: cp.pace, interval: cp.interval, restTime: cp.restTime
+      })));
+      const configCheckpointsStr = JSON.stringify(currentConfig.checkpoints);
+
+      if (currentCheckpointsStr !== configCheckpointsStr || startDateTime !== currentConfig.startDateTime) {
+        setCurrentConfig(prevConfig => ({
+          ...prevConfig,
+          startDateTime,
+          checkpoints: checkpoints.map(cp => ({
+            id: cp.id,
+            name: cp.name,
+            type: cp.type,
+            distance: cp.distance,
+            pace: cp.pace,
+            interval: cp.interval,
+            restTime: cp.restTime
+          }))
+        }));
+      }
+    }
+  }, [checkpoints, startDateTime, isInitialized]);
 
   const handleConfigChange = (newConfig: RunningScheduleConfig) => {
     setCurrentConfig(newConfig);
-  };
-
-  // 設定の内容が変更されたときに現在の設定も更新
-  const updateCurrentConfig = () => {
-    setCurrentConfig(prev => ({
-      ...prev,
-      startDateTime,
-      checkpoints: checkpoints.map(cp => ({ ...cp }))
-    }));
   };
 
   const calculateTimes = useTimeCalculations(startDateTime, checkpoints);
@@ -79,22 +99,15 @@ const RunningSchedulePlanner = () => {
 
   const addCheckpoint = () => {
     const newId = Math.max(...checkpoints.map(cp => cp.id)) + 1;
-    setCheckpoints(prev => {
-      const newCheckpoints = [...prev, {
-        id: newId,
-        name: '新しいチェックポイント',
-        type: '',
-        distance: 0,
-        pace: 10,
-        interval: 0,
-        restTime: 5,
-      }];
-
-      // 設定を更新
-      setTimeout(() => updateCurrentConfig(), 0);
-
-      return newCheckpoints;
-    });
+    setCheckpoints(prev => [...prev, {
+      id: newId,
+      name: '新しいチェックポイント',
+      type: '' as const,
+      distance: 0,
+      pace: 10,
+      interval: 0,
+      restTime: 5,
+    }]);
   };
 
   const handleCheckpointChange = (id: number, field: string, value: string | number) => {
@@ -126,9 +139,6 @@ const RunningSchedulePlanner = () => {
         }
       }
 
-      // 設定を更新
-      setTimeout(() => updateCurrentConfig(), 0);
-
       return updatedCheckpoints;
     });
   };
@@ -142,9 +152,6 @@ const RunningSchedulePlanner = () => {
         const targetIndex = target > fromIndex ? target - 1 : target;
         arrayMove(newCheckpoints, fromIndex, targetIndex);
       });
-
-      // 設定を更新
-      setTimeout(() => updateCurrentConfig(), 0);
 
       return newCheckpoints;
     });
@@ -177,7 +184,6 @@ const RunningSchedulePlanner = () => {
             value={startDateTime}
             onChange={(e) => {
               setStartDateTime(e.target.value);
-              updateCurrentConfig();
             }}
             className="w-48"
           />

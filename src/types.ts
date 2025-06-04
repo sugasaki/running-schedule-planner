@@ -1,7 +1,10 @@
+// チェックポイントの区分種類
+export type CheckpointType = '' | '集合' | 'スタート' | 'コンビニ' | '観光' | '休憩' | 'ゴール' | '銭湯' | '打上げ';
+
 export interface Checkpoint {
   id: number;
   name: string;
-  type: string;
+  type: CheckpointType;
   distance: number;
   pace: number;
   interval: number;

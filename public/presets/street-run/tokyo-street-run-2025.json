@@ -39,7 +39,7 @@
             {
                 "id": 3,
                 "name": "コンビニ",
-                "type": "",
+                "type": "コンビニ",
                 "distance": 10,
                 "pace": 10,
                 "interval": 4.2,
@@ -48,7 +48,7 @@
             {
                 "id": 4,
                 "name": "北池袋の肉まん研究所",
-                "type": "",
+                "type": "休憩",
                 "distance": 19.82,
                 "pace": 10,
                 "interval": 4.2,
@@ -57,7 +57,7 @@
             {
                 "id": 5,
                 "name": "巣鴨",
-                "type": "",
+                "type": "観光",
                 "distance": 22.13,
                 "pace": 10,
                 "interval": 0.6,
@@ -66,7 +66,7 @@
             {
                 "id": 6,
                 "name": "谷中銀座",
-                "type": "",
+                "type": "観光",
                 "distance": 25.59,
                 "pace": 10,
                 "interval": 0.2,
@@ -75,7 +75,7 @@
             {
                 "id": 7,
                 "name": "新吉原花園池跡 弁天観音",
-                "type": "",
+                "type": "観光",
                 "distance": 28.8,
                 "pace": 10,
                 "interval": 1.1,
@@ -84,7 +84,7 @@
             {
                 "id": 8,
                 "name": "浅草寺",
-                "type": "",
+                "type": "観光",
                 "distance": 30.26,
                 "pace": 10,
                 "interval": 1.1,
@@ -93,7 +93,7 @@
             {
                 "id": 9,
                 "name": "両国メンチ",
-                "type": "",
+                "type": "休憩",
                 "distance": 32.83,
                 "pace": 10,
                 "interval": 1.55,

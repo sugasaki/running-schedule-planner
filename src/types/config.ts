@@ -1,3 +1,5 @@
+import type { CheckpointType } from '../types';
+
 export interface RunningScheduleConfig {
     id: string;
     name: string;
@@ -6,7 +8,7 @@ export interface RunningScheduleConfig {
     checkpoints: {
         id: number;
         name: string;
-        type: string;
+        type: CheckpointType;
         distance: number;
         pace: number;
         interval: number;
