@@ -1,26 +1,13 @@
 import { useState } from 'react';
-import { Play, MapPin } from 'lucide-react';
-import type { DragEndEvent } from '@dnd-kit/core';
+import { Play } from 'lucide-react';
+import type { Checkpoint } from './types';
 import { arrayMove } from '@dnd-kit/sortable';
-import type { Checkpoint, Column } from './types';
 import { useTimeCalculations } from './hooks/useTimeCalculations';
 import { calculateTotalTime } from './utils/timeUtils';
-import ScheduleTable from './components/ScheduleTable';
+import HandsontableSchedule from './components/HandsontableSchedule';
 
 const RunningSchedulePlanner = () => {
   const [startDateTime, setStartDateTime] = useState('2025-06-07T08:30');
-  const [columns, setColumns] = useState<Column[]>([
-    { id: 'name', label: '場所', width: '150px' },
-    { id: 'type', label: '区分', width: '100px' },
-    { id: 'distance', label: '距離\\n(km)', width: '100px' },
-    { id: 'pace', label: 'ペース\\n(分/km)', width: '100px' },
-    { id: 'interval', label: '間隔\\n(km)', width: '100px' },
-    { id: 'restTime', label: '休憩\\n(分)', width: '100px' },
-    { id: 'date', label: '日付', width: '100px' },
-    { id: 'arrivalTime', label: '到着', width: '100px' },
-    { id: 'departureTime', label: '出発', width: '100px' },
-    { id: 'actions', label: '操作', width: '80px' },
-  ]);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([
     { id: 0, name: '御徒町', type: '集合', distance: 0, pace: 0, interval: 0, restTime: 0 },
     { id: 1, name: '御器所', type: 'スタート', distance: 0, pace: 0, interval: 0, restTime: 30 },
@@ -54,34 +41,6 @@ const RunningSchedulePlanner = () => {
 
   const calculateTimes = useTimeCalculations(startDateTime, checkpoints);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) return;
-
-    if (typeof active.id === 'string' && active.id.startsWith('column-')) {
-      const activeColumnId = active.id.replace('column-', '');
-      const overColumnId = over.id.toString().replace('column-', '');
-
-      if (activeColumnId === 'no' || overColumnId === 'no') return;
-
-      setColumns((columns) => {
-        const oldIndex = columns.findIndex((col) => col.id === activeColumnId);
-        const newIndex = columns.findIndex((col) => col.id === overColumnId);
-
-        if (oldIndex !== -1 && newIndex !== -1) {
-          return arrayMove(columns, oldIndex, newIndex);
-        }
-        return columns;
-      });
-    } else {
-      setCheckpoints((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
 
   const addCheckpoint = () => {
     const newId = Math.max(...checkpoints.map(cp => cp.id)) + 1;
@@ -129,6 +88,19 @@ const RunningSchedulePlanner = () => {
     });
   };
 
+  const handleRowMove = (rows: number[], target: number) => {
+    // 行移動後のcheckpointsの順序を更新
+    setCheckpoints(prev => {
+      const newCheckpoints = [...prev];
+      // 複数行の移動をサポート
+      rows.forEach((fromIndex) => {
+        const targetIndex = target > fromIndex ? target - 1 : target;
+        arrayMove(newCheckpoints, fromIndex, targetIndex);
+      });
+      return newCheckpoints;
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-4">
       <div className="mb-6">
@@ -150,29 +122,13 @@ const RunningSchedulePlanner = () => {
         </div>
       </div>
 
-      <ScheduleTable
+      <HandsontableSchedule
         checkpoints={calculateTimes}
-        columns={columns}
         onCheckpointChange={handleCheckpointChange}
-        onColumnResize={(columnId, newWidth) => {
-          setColumns(cols =>
-            cols.map(col =>
-              col.id === columnId ? { ...col, width: newWidth } : col
-            )
-          );
-        }}
-        onDragEnd={handleDragEnd}
+        onAddCheckpoint={addCheckpoint}
+        onRowMove={handleRowMove}
       />
 
-      <div className="mt-4">
-        <button
-          onClick={addCheckpoint}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
-        >
-          <MapPin className="w-4 h-4" />
-          チェックポイント追加
-        </button>
-      </div>
 
       <div className="mt-6 space-y-4">
         <div className="bg-gray-50 p-4 rounded-lg">
@@ -183,9 +139,10 @@ const RunningSchedulePlanner = () => {
             <li>• 到着・出発時刻は自動計算されます（月/日 時:分 形式で表示）</li>
             <li>• 集合時間、スタート時間、ゴール時間を区別して管理できます</li>
             <li>• 休憩時間0分の場合は出発時刻が表示されません</li>
-            <li>• 行の左端のグリップアイコンをドラッグして順序を変更できます</li>
-            <li>• 列の見出しのグリップアイコンをドラッグして列の順序を変更できます</li>
-            <li>• 列の右端をドラッグして列の幅を調整できます</li>
+            <li>• 行を右クリックして行の追加・削除ができます</li>
+            <li>• 行番号をドラッグして行の順序を変更できます（集合・スタート行は移動不可）</li>
+            <li>• 列ヘッダーをドラッグして列の順序を変更できます（No列は移動不可）</li>
+            <li>• 列の境界をドラッグして列幅を調整できます</li>
           </ul>
         </div>
 
