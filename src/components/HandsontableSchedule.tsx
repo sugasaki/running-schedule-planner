@@ -159,10 +159,12 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
   };
 
   return (
-    <div className="handsontable-container">
+    <div className="handsontable-container relative z-10">
       <style>{`
         .handsontable-container {
           margin: 20px 0;
+          position: relative;
+          z-index: 10;
         }
         
         .has-error {
@@ -186,7 +188,7 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           color: #6b7280 !important;
         }
       `}</style>
-      
+
       <HotTable
         ref={hotRef}
         data={tableData}
@@ -217,11 +219,11 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           // また、最初の2行の位置に移動することも不可
           const hasProtectedRows = rows.some(row => row < 2);
           const targetInProtectedArea = target < 2;
-          
+
           if (hasProtectedRows || targetInProtectedArea) {
             return false;
           }
-          
+
           return true;
         }}
         afterCreateRow={() => {
@@ -245,7 +247,7 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           };
         }}
       />
-      
+
       <div className="mt-4 space-x-2">
         <button
           onClick={onAddCheckpoint}

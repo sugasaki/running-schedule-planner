@@ -1,58 +1,100 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Play } from 'lucide-react';
 import type { Checkpoint } from './types';
+import type { RunningScheduleConfig } from './types/config';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useTimeCalculations } from './hooks/useTimeCalculations';
 import { calculateTotalTime } from './utils/timeUtils';
 import HandsontableSchedule from './components/HandsontableSchedule';
+import { ConfigSelector } from './components/ConfigSelector';
+import { ConfigManager } from './services/ConfigManager';
 
 const RunningSchedulePlanner = () => {
-  const [startDateTime, setStartDateTime] = useState('2025-06-07T08:30');
-  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([
-    { id: 0, name: '御徒町', type: '集合', distance: 0, pace: 0, interval: 0, restTime: 0 },
-    { id: 1, name: '御器所', type: 'スタート', distance: 0, pace: 0, interval: 0, restTime: 30 },
-    { id: 2, name: 'そばよし', type: '', distance: 2.74, pace: 10, interval: 5, restTime: 20 },
-    { id: 3, name: 'コンビニ', type: '', distance: 10, pace: 10, interval: 4.2, restTime: 10 },
-    { id: 4, name: '北池袋の肉まん研究所', type: '', distance: 19.82, pace: 10, interval: 4.2, restTime: 10 },
-    { id: 5, name: '巣鴨', type: '', distance: 22.13, pace: 10, interval: 0.6, restTime: 10 },
-    { id: 6, name: '谷中銀座', type: '', distance: 25.59, pace: 10, interval: 0.2, restTime: 10 },
-    { id: 7, name: '新吉原花園池跡 弁天観音', type: '', distance: 28.8, pace: 10, interval: 1.1, restTime: 10 },
-    { id: 8, name: '浅草寺', type: '', distance: 30.26, pace: 10, interval: 1.1, restTime: 10 },
-    { id: 9, name: '両国メンチ', type: '', distance: 32.83, pace: 10, interval: 1.55, restTime: 15 },
-    { id: 10, name: '高輪ゲートウェイ', type: '', distance: 44.44, pace: 10, interval: 1.78, restTime: 10 },
-    { id: 11, name: '目黒川', type: '', distance: 47.96, pace: 10, interval: 1.05, restTime: 10 },
-    { id: 12, name: '祐天寺の稲毛屋天野屋', type: '', distance: 51.35, pace: 10, interval: 3.5, restTime: 15 },
-    { id: 12, name: '武蔵小山の鳥勇', type: '', distance: 54.68, pace: 10, interval: 1.66, restTime: 15 },
-    { id: 13, name: '自由が丘の腰塚のメンチ', type: '', distance: 59.24, pace: 10, interval: 3.63, restTime: 15 },
-    { id: 14, name: '三茶のキャロットタワー', type: '', distance: 64.62, pace: 10, interval: 0, restTime: 20 },
-    { id: 15, name: '下北沢', type: '', distance: 66.91, pace: 10, interval: 11, restTime: 10 },
-    { id: 16, name: '椎名町の南天そば', type: '', distance: 80.09, pace: 10, interval: 0, restTime: 30 },
-    { id: 17, name: 'コンビニ', type: '', distance: 87.3, pace: 10, interval: 0, restTime: 10 },
-    { id: 18, name: '日暮里の一由そば', type: '', distance: 96.71, pace: 10, interval: 0, restTime: 30 },
-    { id: 19, name: '平井駅(コンビニ)', type: '', distance: 105.23, pace: 10, interval: 0, restTime: 15 },
-    { id: 20, name: '砂町銀座', type: '', distance: 109.87, pace: 10, interval: 0, restTime: 10 },
-    { id: 21, name: '横十間川', type: '', distance: 111.34, pace: 10, interval: 0, restTime: 10 },
-    { id: 22, name: '亀戸神社', type: '', distance: 114.01, pace: 10, interval: 0, restTime: 10 },
-    { id: 23, name: 'スカイツリー', type: '', distance: 115.63, pace: 10, interval: 0, restTime: 10 },
-    { id: 24, name: '御徒町', type: 'ゴール', distance: 120.37, pace: 10, interval: 0, restTime: 20 },
-    { id: 25, name: '燕湯', type: '銭湯', distance:120.5, pace: 10, interval: 0, restTime: 60 },
-    { id: 26, name: '打上', type: '打上', distance:121.5, pace: 10, interval: 0, restTime: 120 },
-  ]);
+  const [currentConfig, setCurrentConfig] = useState<RunningScheduleConfig>({
+    id: 'default',
+    name: 'デフォルト設定',
+    description: '',
+    startDateTime: '2025-06-07T08:30',
+    checkpoints: [
+      { id: 0, name: '新しいチェックポイント', type: '集合', distance: 0, pace: 0, interval: 0, restTime: 0 },
+    ]
+  });
+
+  const [startDateTime, setStartDateTime] = useState(currentConfig.startDateTime);
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>(currentConfig.checkpoints);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // ConfigManagerの初期化とデフォルト設定の読み込み
+  useEffect(() => {
+    const initializeConfig = async () => {
+      try {
+        await ConfigManager.initialize();
+        const defaultPreset = await ConfigManager.getPresetById('tokyo-street-run-2025') ||
+          await ConfigManager.getPresetById('default-fallback');
+        if (defaultPreset?.config) {
+          setCurrentConfig(defaultPreset.config);
+        }
+        setIsInitialized(true);
+      } catch (error) {
+        console.warn('設定の初期化に失敗しました:', error);
+        setIsInitialized(true);
+      }
+    };
+    initializeConfig();
+  }, []);
+
+  // 設定が変更されたときにstateを更新
+  useEffect(() => {
+    setStartDateTime(currentConfig.startDateTime);
+    setCheckpoints(currentConfig.checkpoints);
+  }, [currentConfig]);
+
+  const handleConfigChange = (newConfig: RunningScheduleConfig) => {
+    setCurrentConfig(newConfig);
+  };
+
+  // 設定の内容が変更されたときに現在の設定も更新
+  const updateCurrentConfig = () => {
+    setCurrentConfig(prev => ({
+      ...prev,
+      startDateTime,
+      checkpoints: checkpoints.map(cp => ({ ...cp }))
+    }));
+  };
 
   const calculateTimes = useTimeCalculations(startDateTime, checkpoints);
+
+  // 初期化中の場合はローディング表示
+  if (!isInitialized) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <div className="inline-flex items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+          <span>設定を読み込み中...</span>
+        </div>
+      </div>
+    );
+  }
 
 
   const addCheckpoint = () => {
     const newId = Math.max(...checkpoints.map(cp => cp.id)) + 1;
-    setCheckpoints(prev => [...prev, {
-      id: newId,
-      name: '新しいチェックポイント',
-      type: '',
-      distance: 0,
-      pace: 10,
-      interval: 0,
-      restTime: 5,
-    }]);
+    setCheckpoints(prev => {
+      const newCheckpoints = [...prev, {
+        id: newId,
+        name: '新しいチェックポイント',
+        type: '',
+        distance: 0,
+        pace: 10,
+        interval: 0,
+        restTime: 5,
+      }];
+
+      // 設定を更新
+      setTimeout(() => updateCurrentConfig(), 0);
+
+      return newCheckpoints;
+    });
   };
 
   const handleCheckpointChange = (id: number, field: string, value: string | number) => {
@@ -60,11 +102,11 @@ const RunningSchedulePlanner = () => {
       const updatedCheckpoints = prev.map(cp =>
         cp.id === id
           ? {
-              ...cp,
-              [field]: ['distance', 'pace', 'interval', 'restTime'].includes(field)
-                ? Number(value)
-                : value,
-            }
+            ...cp,
+            [field]: ['distance', 'pace', 'interval', 'restTime'].includes(field)
+              ? Number(value)
+              : value,
+          }
           : cp
       );
 
@@ -84,6 +126,9 @@ const RunningSchedulePlanner = () => {
         }
       }
 
+      // 設定を更新
+      setTimeout(() => updateCurrentConfig(), 0);
+
       return updatedCheckpoints;
     });
   };
@@ -97,17 +142,31 @@ const RunningSchedulePlanner = () => {
         const targetIndex = target > fromIndex ? target - 1 : target;
         arrayMove(newCheckpoints, fromIndex, targetIndex);
       });
+
+      // 設定を更新
+      setTimeout(() => updateCurrentConfig(), 0);
+
       return newCheckpoints;
     });
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-blue-700 mb-4 flex items-center gap-2">
-          <Play className="w-6 h-6" />
-          2025年5月18日 街ラン
-        </h1>
+    <div className="max-w-7xl mx-auto p-4 relative">
+      <div className="mb-6 relative z-20">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-blue-700 flex items-center gap-2">
+            <Play className="w-6 h-6" />
+            {currentConfig.name}
+          </h1>
+          <ConfigSelector
+            currentConfig={currentConfig}
+            onConfigChange={handleConfigChange}
+          />
+        </div>
+
+        {currentConfig.description && (
+          <p className="text-gray-600 mb-4">{currentConfig.description}</p>
+        )}
 
         <div className="bg-blue-50 p-4 rounded-lg mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -116,18 +175,23 @@ const RunningSchedulePlanner = () => {
           <input
             type="datetime-local"
             value={startDateTime}
-            onChange={(e) => setStartDateTime(e.target.value)}
+            onChange={(e) => {
+              setStartDateTime(e.target.value);
+              updateCurrentConfig();
+            }}
             className="w-48"
           />
         </div>
       </div>
 
-      <HandsontableSchedule
-        checkpoints={calculateTimes}
-        onCheckpointChange={handleCheckpointChange}
-        onAddCheckpoint={addCheckpoint}
-        onRowMove={handleRowMove}
-      />
+      <div className="relative z-10">
+        <HandsontableSchedule
+          checkpoints={calculateTimes}
+          onCheckpointChange={handleCheckpointChange}
+          onAddCheckpoint={addCheckpoint}
+          onRowMove={handleRowMove}
+        />
+      </div>
 
 
       <div className="mt-6 space-y-4">

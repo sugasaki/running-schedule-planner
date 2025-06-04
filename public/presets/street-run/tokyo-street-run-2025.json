@@ -1,0 +1,266 @@
+{
+    "id": "tokyo-street-run-2025",
+    "name": "2025年5月18日 街ラン",
+    "description": "東京の名所を巡る120kmの街ランコース",
+    "category": "street-run",
+    "config": {
+        "id": "tokyo-street-run-2025",
+        "name": "2025年5月18日 街ラン",
+        "description": "東京の名所を巡る120kmの街ランコース",
+        "startDateTime": "2025-06-07T08:30",
+        "checkpoints": [
+            {
+                "id": 0,
+                "name": "御徒町",
+                "type": "集合",
+                "distance": 0,
+                "pace": 0,
+                "interval": 0,
+                "restTime": 0
+            },
+            {
+                "id": 1,
+                "name": "御器所",
+                "type": "スタート",
+                "distance": 0,
+                "pace": 0,
+                "interval": 0,
+                "restTime": 30
+            },
+            {
+                "id": 2,
+                "name": "そばよし",
+                "type": "",
+                "distance": 2.74,
+                "pace": 10,
+                "interval": 5,
+                "restTime": 20
+            },
+            {
+                "id": 3,
+                "name": "コンビニ",
+                "type": "",
+                "distance": 10,
+                "pace": 10,
+                "interval": 4.2,
+                "restTime": 10
+            },
+            {
+                "id": 4,
+                "name": "北池袋の肉まん研究所",
+                "type": "",
+                "distance": 19.82,
+                "pace": 10,
+                "interval": 4.2,
+                "restTime": 10
+            },
+            {
+                "id": 5,
+                "name": "巣鴨",
+                "type": "",
+                "distance": 22.13,
+                "pace": 10,
+                "interval": 0.6,
+                "restTime": 10
+            },
+            {
+                "id": 6,
+                "name": "谷中銀座",
+                "type": "",
+                "distance": 25.59,
+                "pace": 10,
+                "interval": 0.2,
+                "restTime": 10
+            },
+            {
+                "id": 7,
+                "name": "新吉原花園池跡 弁天観音",
+                "type": "",
+                "distance": 28.8,
+                "pace": 10,
+                "interval": 1.1,
+                "restTime": 10
+            },
+            {
+                "id": 8,
+                "name": "浅草寺",
+                "type": "",
+                "distance": 30.26,
+                "pace": 10,
+                "interval": 1.1,
+                "restTime": 10
+            },
+            {
+                "id": 9,
+                "name": "両国メンチ",
+                "type": "",
+                "distance": 32.83,
+                "pace": 10,
+                "interval": 1.55,
+                "restTime": 15
+            },
+            {
+                "id": 10,
+                "name": "高輪ゲートウェイ",
+                "type": "",
+                "distance": 44.44,
+                "pace": 10,
+                "interval": 1.78,
+                "restTime": 10
+            },
+            {
+                "id": 11,
+                "name": "目黒川",
+                "type": "",
+                "distance": 47.96,
+                "pace": 10,
+                "interval": 1.05,
+                "restTime": 10
+            },
+            {
+                "id": 12,
+                "name": "祐天寺の稲毛屋天野屋",
+                "type": "",
+                "distance": 51.35,
+                "pace": 10,
+                "interval": 3.5,
+                "restTime": 15
+            },
+            {
+                "id": 13,
+                "name": "武蔵小山の鳥勇",
+                "type": "",
+                "distance": 54.68,
+                "pace": 10,
+                "interval": 1.66,
+                "restTime": 15
+            },
+            {
+                "id": 14,
+                "name": "自由が丘の腰塚のメンチ",
+                "type": "",
+                "distance": 59.24,
+                "pace": 10,
+                "interval": 3.63,
+                "restTime": 15
+            },
+            {
+                "id": 15,
+                "name": "三茶のキャロットタワー",
+                "type": "",
+                "distance": 64.62,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 20
+            },
+            {
+                "id": 16,
+                "name": "下北沢",
+                "type": "",
+                "distance": 66.91,
+                "pace": 10,
+                "interval": 11,
+                "restTime": 10
+            },
+            {
+                "id": 17,
+                "name": "椎名町の南天そば",
+                "type": "",
+                "distance": 80.09,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 30
+            },
+            {
+                "id": 18,
+                "name": "コンビニ",
+                "type": "",
+                "distance": 87.3,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 10
+            },
+            {
+                "id": 19,
+                "name": "日暮里の一由そば",
+                "type": "",
+                "distance": 96.71,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 30
+            },
+            {
+                "id": 20,
+                "name": "平井駅(コンビニ)",
+                "type": "",
+                "distance": 105.23,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 15
+            },
+            {
+                "id": 21,
+                "name": "砂町銀座",
+                "type": "",
+                "distance": 109.87,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 10
+            },
+            {
+                "id": 22,
+                "name": "横十間川",
+                "type": "",
+                "distance": 111.34,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 10
+            },
+            {
+                "id": 23,
+                "name": "亀戸神社",
+                "type": "",
+                "distance": 114.01,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 10
+            },
+            {
+                "id": 24,
+                "name": "スカイツリー",
+                "type": "",
+                "distance": 115.63,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 10
+            },
+            {
+                "id": 25,
+                "name": "御徒町",
+                "type": "ゴール",
+                "distance": 120.37,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 20
+            },
+            {
+                "id": 26,
+                "name": "燕湯",
+                "type": "銭湯",
+                "distance": 120.5,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 60
+            },
+            {
+                "id": 27,
+                "name": "打上",
+                "type": "打上",
+                "distance": 121.5,
+                "pace": 10,
+                "interval": 0,
+                "restTime": 120
+            }
+        ]
+    }
+}
