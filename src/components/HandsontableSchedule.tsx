@@ -187,25 +187,44 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           background-color: #f9fafb !important;
         }
         
-        .has-error {
+        /* 区分に応じた行の背景色 - より高い優先度で設定 */
+        .handsontable-container .handsontable tbody tr.has-error td {
           background-color: #fef2f2 !important;
         }
         
-        .goal-row {
+        .handsontable-container .handsontable tbody tr.goal-row td {
           background-color: #fefce8 !important;
         }
         
-        .meeting-row {
+        .handsontable-container .handsontable tbody tr.meeting-row td {
           background-color: #f0fdf4 !important;
         }
         
-        .start-row {
+        .handsontable-container .handsontable tbody tr.start-row td {
           background-color: #eff6ff !important;
         }
         
-        .htDimmed {
+        /* 読み取り専用セルの背景色 */
+        .handsontable-container .handsontable td.htDimmed {
           background-color: #f9fafb !important;
           color: #6b7280 !important;
+        }
+        
+        /* 区分行の読み取り専用セルも適切な背景色を維持 */
+        .handsontable-container .handsontable tbody tr.goal-row td.htDimmed {
+          background-color: #fef3c7 !important;
+        }
+        
+        .handsontable-container .handsontable tbody tr.meeting-row td.htDimmed {
+          background-color: #dcfce7 !important;
+        }
+        
+        .handsontable-container .handsontable tbody tr.start-row td.htDimmed {
+          background-color: #dbeafe !important;
+        }
+        
+        .handsontable-container .handsontable tbody tr.has-error td.htDimmed {
+          background-color: #fee2e2 !important;
         }
       `}</style>
 
