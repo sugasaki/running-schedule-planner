@@ -1,0 +1,7 @@
+{
+    "presets": [
+        "/presets/street-run/tokyo-street-run-2025.json",
+        "/presets/marathon/marathon-training-16weeks.json",
+        "/presets/training/10k-training.json"
+    ]
+}

@@ -1,0 +1,68 @@
+{
+    "id": "10k-training",
+    "name": "10K トレーニング",
+    "description": "10K完走を目指すトレーニングプラン",
+    "category": "training",
+    "config": {
+        "id": "10k-training",
+        "name": "10K トレーニング",
+        "description": "10K完走を目指すトレーニングプラン",
+        "startDateTime": "2025-06-07T06:30",
+        "checkpoints": [
+            {
+                "id": 0,
+                "name": "スタート",
+                "type": "集合",
+                "distance": 0,
+                "pace": 0,
+                "interval": 0,
+                "restTime": 0
+            },
+            {
+                "id": 1,
+                "name": "ウォーミングアップ",
+                "type": "スタート",
+                "distance": 0,
+                "pace": 0,
+                "interval": 0,
+                "restTime": 5
+            },
+            {
+                "id": 2,
+                "name": "2km地点",
+                "type": "",
+                "distance": 2,
+                "pace": 5.5,
+                "interval": 0,
+                "restTime": 1
+            },
+            {
+                "id": 3,
+                "name": "5km地点",
+                "type": "",
+                "distance": 5,
+                "pace": 5.5,
+                "interval": 0,
+                "restTime": 2
+            },
+            {
+                "id": 4,
+                "name": "8km地点",
+                "type": "",
+                "distance": 8,
+                "pace": 6,
+                "interval": 0,
+                "restTime": 2
+            },
+            {
+                "id": 5,
+                "name": "ゴール",
+                "type": "ゴール",
+                "distance": 10,
+                "pace": 6,
+                "interval": 0,
+                "restTime": 0
+            }
+        ]
+    }
+}

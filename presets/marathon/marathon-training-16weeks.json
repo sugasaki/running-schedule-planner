@@ -1,0 +1,77 @@
+{
+    "id": "marathon-training-16weeks",
+    "name": "マラソン 16週間プログラム",
+    "description": "初心者向けマラソン完走トレーニングプラン",
+    "category": "marathon",
+    "config": {
+        "id": "marathon-training-16weeks",
+        "name": "マラソン 16週間プログラム",
+        "description": "初心者向けマラソン完走トレーニングプラン",
+        "startDateTime": "2025-06-07T07:00",
+        "checkpoints": [
+            {
+                "id": 0,
+                "name": "スタート地点",
+                "type": "集合",
+                "distance": 0,
+                "pace": 0,
+                "interval": 0,
+                "restTime": 0
+            },
+            {
+                "id": 1,
+                "name": "ウォーミングアップ",
+                "type": "スタート",
+                "distance": 0,
+                "pace": 0,
+                "interval": 0,
+                "restTime": 10
+            },
+            {
+                "id": 2,
+                "name": "5km地点",
+                "type": "",
+                "distance": 5,
+                "pace": 6,
+                "interval": 0,
+                "restTime": 2
+            },
+            {
+                "id": 3,
+                "name": "10km地点",
+                "type": "",
+                "distance": 10,
+                "pace": 6,
+                "interval": 0,
+                "restTime": 2
+            },
+            {
+                "id": 4,
+                "name": "15km地点",
+                "type": "",
+                "distance": 15,
+                "pace": 6.5,
+                "interval": 0,
+                "restTime": 3
+            },
+            {
+                "id": 5,
+                "name": "20km地点",
+                "type": "",
+                "distance": 20,
+                "pace": 6.5,
+                "interval": 0,
+                "restTime": 3
+            },
+            {
+                "id": 6,
+                "name": "ゴール",
+                "type": "ゴール",
+                "distance": 21.1,
+                "pace": 7,
+                "interval": 0,
+                "restTime": 0
+            }
+        ]
+    }
+}
