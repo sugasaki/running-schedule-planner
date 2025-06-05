@@ -1,12 +1,12 @@
 {
     "id": "tokyo-street-run-2025",
-    "name": "2025年5月18日 街ラン",
-    "description": "東京の名所を巡る120kmの街ランコース",
+    "name": "2025年6月7日 東京120K",
+    "description": "東京の名所を巡る120km",
     "category": "street-run",
     "config": {
         "id": "tokyo-street-run-2025",
-        "name": "2025年5月18日 街ラン",
-        "description": "東京の名所を巡る120kmの街ランコース",
+        "name": "2025年6月7日 東京120K",
+        "description": "東京の名所を巡る120km",
         "startDateTime": "2025-06-07T08:30",
         "checkpoints": [
             {
