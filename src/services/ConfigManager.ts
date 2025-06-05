@@ -127,13 +127,14 @@ export class ConfigManager {
             const config = JSON.parse(jsonString);
             this.validateConfig(config);
             return config;
-        } catch (error) {
+        } catch {
             throw new Error('設定ファイルの形式が正しくありません');
         }
     }
 
-    private static validateConfig(config: any): void {
-        if (!config.id || !config.name || !Array.isArray(config.checkpoints)) {
+    private static validateConfig(config: unknown): void {
+        const configObj = config as Record<string, unknown>;
+        if (!configObj.id || !configObj.name || !Array.isArray(configObj.checkpoints)) {
             throw new Error('必要な設定項目が不足しています');
         }
     }

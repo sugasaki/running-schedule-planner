@@ -1,5 +1,5 @@
 // チェックポイントの区分種類
-export type CheckpointType = '' | '集合' | 'スタート' | 'コンビニ' | '観光' | '休憩' | 'ゴール' | '銭湯' | '打上げ';
+export type CheckpointType = '' | '集合' | 'スタート' | 'トイレ' | 'コンビニ' | '観光' | '休憩' | 'ゴール' | '銭湯' | '打上げ';
 
 export interface Checkpoint {
   id: number;
@@ -41,5 +41,5 @@ export interface ScheduleTableProps {
   columns: Column[];
   onCheckpointChange: (id: number, field: string, value: string | number) => void;
   onColumnResize: (columnId: string, newWidth: string) => void;
-  onDragEnd: (event: any) => void;
+  onDragEnd: (event: unknown) => void;
 }

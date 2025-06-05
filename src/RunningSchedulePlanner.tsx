@@ -123,8 +123,9 @@ const RunningSchedulePlanner = () => {
           : cp
       );
 
+      const changedIndex = updatedCheckpoints.findIndex(cp => cp.id === id);
+
       if (field === 'distance') {
-        const changedIndex = updatedCheckpoints.findIndex(cp => cp.id === id);
         if (changedIndex > 1 && changedIndex < updatedCheckpoints.length - 1) {
           const nextCheckpoint = updatedCheckpoints[changedIndex + 1];
           if (nextCheckpoint) {
@@ -139,36 +140,18 @@ const RunningSchedulePlanner = () => {
         }
       }
 
-      return updatedCheckpoints;
-    });
-  };
-
-  const handleRowMove = (rows: number[], target: number) => {
-    // 行移動後のcheckpointsの順序を更新
-    setCheckpoints(prev => {
-      let newCheckpoints = [...prev];
-      // 複数行の移動をサポート
-      rows.forEach((fromIndex) => {
-        const targetIndex = target > fromIndex ? target - 1 : target;
-        newCheckpoints = arrayMove(newCheckpoints, fromIndex, targetIndex);
-      });
-
-      // 移動後、全ての行の間隔を再計算
-      const updatedCheckpoints = newCheckpoints.map((checkpoint, index) => {
-        if (index <= 1) return checkpoint; // 最初の2行はスキップ
-        
-        const prevCheckpoint = newCheckpoints[index - 1];
-        const calculatedInterval = Number((checkpoint.distance - prevCheckpoint.distance).toFixed(2));
-        
-        return {
-          ...checkpoint,
-          interval: calculatedInterval > 0 ? calculatedInterval : 0
-        };
-      });
+      // ペース変更時または休憩時間変更時は、該当行から最終行までの時間計算を強制的に再実行
+      // useTimeCalculationsフックが自動的に再計算するため、ここでは変更を記録するだけ
+      if (field === 'pace' || field === 'restTime') {
+        // 時間計算は useTimeCalculations フックで自動的に再実行される
+        // changedIndexから最終行までが影響を受ける
+        console.log(`${field}が変更されました。行${changedIndex}から最終行まで再計算されます。`);
+      }
 
       return updatedCheckpoints;
     });
   };
+
 
   return (
     <div className="max-w-7xl mx-auto p-4 relative">
@@ -208,7 +191,6 @@ const RunningSchedulePlanner = () => {
           checkpoints={calculateTimes}
           onCheckpointChange={handleCheckpointChange}
           onAddCheckpoint={addCheckpoint}
-          onRowMove={handleRowMove}
         />
       </div>
 
