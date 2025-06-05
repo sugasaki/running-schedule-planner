@@ -22,15 +22,24 @@ export const useTimeCalculations = (startDateTime: string, checkpoints: Checkpoi
       }
     }
 
-    const checkpointsWithUpdatedIntervals = validatedCheckpoints.map((checkpoint, index, array) => {
-      if (index <= 1) return checkpoint;
+    // 距離順でソートしてから間隔を計算
+    const sortedCheckpoints = [...validatedCheckpoints].sort((a, b) => a.distance - b.distance);
+    
+    const checkpointsWithUpdatedIntervals = validatedCheckpoints.map(checkpoint => {
+      // IDが0または1の場合は間隔計算をスキップ（集合・スタート地点）
+      if (checkpoint.id <= 1) return checkpoint;
 
-      const prevCheckpoint = array[index - 1];
+      // ソート済み配列から現在のチェックポイントの位置を見つける
+      const sortedIndex = sortedCheckpoints.findIndex(cp => cp.id === checkpoint.id);
+      
+      if (sortedIndex <= 0) return checkpoint;
+      
+      const prevCheckpoint = sortedCheckpoints[sortedIndex - 1];
       const calculatedInterval = Number((checkpoint.distance - prevCheckpoint.distance).toFixed(2));
 
       return {
         ...checkpoint,
-        interval: calculatedInterval > 0 ? calculatedInterval : checkpoint.interval
+        interval: calculatedInterval
       };
     });
 
