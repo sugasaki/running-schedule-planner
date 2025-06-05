@@ -5,10 +5,10 @@ import 'handsontable/dist/handsontable.full.min.css';
 import type { CheckpointWithTimes } from '../types';
 import { createColumnConfig } from './table/HandsontableConfig';
 import { handsontableStyles } from './table/HandsontableStyles';
-import { 
-  convertToTableData, 
-  createAfterChangeHandler, 
-  createCellsRenderer 
+import {
+  convertToTableData,
+  createAfterChangeHandler,
+  createCellsRenderer
 } from './table/HandsontableUtils';
 
 // Register all Handsontable modules
@@ -32,23 +32,23 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
   // 全行の距離チェック処理
   const checkAllRowsForDistanceErrors = () => {
     if (!hotRef.current) return;
-    
+
     const hotInstance = hotRef.current.hotInstance;
     if (!hotInstance) return;
-    
+
     const errorRows = new Set<number>();
     const rowCount = hotInstance.countRows();
-    
+
     // 3行目以降（インデックス2以降）をチェック
     for (let row = 2; row < rowCount; row++) {
       const currentDistance = hotInstance.getDataAtCell(row, 3);
       const prevDistance = hotInstance.getDataAtCell(row - 1, 3);
-      
+
       if (currentDistance !== null && prevDistance !== null && currentDistance < prevDistance) {
         // エラーがある行のIDを取得してcheckpoints配列でのインデックスを取得
         const rowId = hotInstance.getDataAtCell(row, 0);
         const checkpointIndex = checkpoints.findIndex(cp => cp.id === rowId);
-        
+
         if (checkpointIndex !== -1) {
           errorRows.add(checkpointIndex);
         }
@@ -68,7 +68,7 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
     if (recheckTimeoutRef.current) {
       clearTimeout(recheckTimeoutRef.current);
     }
-    
+
     // 新しいタイマーを設定（200ms後に実行）
     // これにより連続した編集の最後の変更から200ms後に1回だけチェックが実行される
     recheckTimeoutRef.current = setTimeout(() => {
@@ -92,7 +92,7 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
         colHeaders={true}
         rowHeaders={true}
         width="100%"
-        height="800"
+        height="700"
         licenseKey="non-commercial-and-evaluation"
         stretchH="all"
         columnSorting={false}
