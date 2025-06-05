@@ -78,7 +78,7 @@ export const createAfterChangeHandler = (
   };
 };
 
-export const createCellsRenderer = (checkpoints: CheckpointWithTimes[], hotRef: React.RefObject<any>, rowsWithError: Set<number>) => {
+export const createCellsRenderer = (checkpoints: CheckpointWithTimes[], rowsWithError: Set<number>) => {
   return (row: number, col: number) => {
     const checkpoint = checkpoints[row];
     if (!checkpoint) return {};

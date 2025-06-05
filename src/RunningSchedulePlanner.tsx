@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Play } from 'lucide-react';
 import type { Checkpoint } from './types';
 import type { RunningScheduleConfig } from './types/config';
-import { arrayMove } from '@dnd-kit/sortable';
 import { useTimeCalculations } from './hooks/useTimeCalculations';
 import { calculateTotalTime } from './utils/timeUtils';
 import HandsontableSchedule from './components/HandsontableSchedule';

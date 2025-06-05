@@ -27,7 +27,7 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
 }) => {
   const hotRef = useRef<HotTableClass | null>(null);
   const [rowsWithError, setRowsWithError] = useState<Set<number>>(new Set());
-  const recheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const recheckTimeoutRef = useRef<number | null>(null);
 
   // 全行の距離チェック処理
   const checkAllRowsForDistanceErrors = () => {
@@ -79,7 +79,7 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
   const tableData = convertToTableData(checkpoints);
   const columns = createColumnConfig(hotRef);
   const handleAfterChange = createAfterChangeHandler(checkpoints, onCheckpointChange, debouncedCheckAllRows, hotRef);
-  const cellsRenderer = createCellsRenderer(checkpoints, hotRef, rowsWithError);
+  const cellsRenderer = createCellsRenderer(checkpoints, rowsWithError);
 
   return (
     <div className="handsontable-container relative z-10">
@@ -125,11 +125,11 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
         afterCreateRow={() => {
           onAddCheckpoint();
         }}
-        afterRowMove={(rows: number[], target: number) => {
+        afterRowMove={() => {
           // 行移動後に全行をチェック
           checkAllRowsForDistanceErrors();
         }}
-        afterColumnMove={(columns: number[], target: number) => {
+        afterColumnMove={() => {
           // 列移動後の処理（現在は特別な処理なし）
         }}
         cells={cellsRenderer}
