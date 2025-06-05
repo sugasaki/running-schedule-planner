@@ -174,7 +174,7 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
         
         /* 区分に応じたセルの背景色 - セル単位で適用 */
         .handsontable-container .handsontable td.has-error {
-          background-color: #fef2f2 !important;
+          background-color: #fee2e2 !important;
         }
         
         .handsontable-container .handsontable td.goal-row {
@@ -209,7 +209,7 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
         }
         
         .handsontable-container .handsontable td.has-error.htDimmed {
-          background-color: #fee2e2 !important;
+          background-color: #fecaca !important;
         }
       `}</style>
 

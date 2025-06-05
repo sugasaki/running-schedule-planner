@@ -146,14 +146,27 @@ const RunningSchedulePlanner = () => {
   const handleRowMove = (rows: number[], target: number) => {
     // 行移動後のcheckpointsの順序を更新
     setCheckpoints(prev => {
-      const newCheckpoints = [...prev];
+      let newCheckpoints = [...prev];
       // 複数行の移動をサポート
       rows.forEach((fromIndex) => {
         const targetIndex = target > fromIndex ? target - 1 : target;
-        arrayMove(newCheckpoints, fromIndex, targetIndex);
+        newCheckpoints = arrayMove(newCheckpoints, fromIndex, targetIndex);
       });
 
-      return newCheckpoints;
+      // 移動後、全ての行の間隔を再計算
+      const updatedCheckpoints = newCheckpoints.map((checkpoint, index) => {
+        if (index <= 1) return checkpoint; // 最初の2行はスキップ
+        
+        const prevCheckpoint = newCheckpoints[index - 1];
+        const calculatedInterval = Number((checkpoint.distance - prevCheckpoint.distance).toFixed(2));
+        
+        return {
+          ...checkpoint,
+          interval: calculatedInterval > 0 ? calculatedInterval : 0
+        };
+      });
+
+      return updatedCheckpoints;
     });
   };
 
