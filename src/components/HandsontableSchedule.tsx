@@ -1,9 +1,15 @@
-import { useRef } from 'react';
-import { HotTable } from '@handsontable/react';
+import { useRef, useState } from 'react';
+import { HotTable, HotTableClass } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
-import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.min.css';
 import type { CheckpointWithTimes } from '../types';
+import { createColumnConfig } from './table/HandsontableConfig';
+import { handsontableStyles } from './table/HandsontableStyles';
+import { 
+  convertToTableData, 
+  createAfterChangeHandler, 
+  createCellsRenderer 
+} from './table/HandsontableUtils';
 
 // Register all Handsontable modules
 registerAllModules();
@@ -12,206 +18,72 @@ interface HandsontableScheduleProps {
   checkpoints: CheckpointWithTimes[];
   onCheckpointChange: (id: number, field: string, value: string | number) => void;
   onAddCheckpoint: () => void;
-  onRowMove?: (from: number[], to: number) => void;
 }
 
 const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
   checkpoints,
   onCheckpointChange,
   onAddCheckpoint,
-  onRowMove,
 }) => {
-  const hotRef = useRef<any>(null);
+  const hotRef = useRef<HotTableClass | null>(null);
+  const [rowsWithError, setRowsWithError] = useState<Set<number>>(new Set());
+  const recheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Handsontable用のデータ形式に変換
-  const tableData = checkpoints.map((checkpoint) => [
-    checkpoint.id,
-    checkpoint.name,
-    checkpoint.type,
-    checkpoint.distance,
-    checkpoint.pace,
-    checkpoint.interval,
-    checkpoint.restTime,
-    checkpoint.date || '',
-    checkpoint.arrivalTime || '',
-    checkpoint.departureTime || '',
-  ]);
-
-  const columns = [
-    {
-      title: 'No',
-      data: 0,
-      readOnly: true,
-      width: 60,
-      className: 'htCenter',
-    },
-    {
-      title: '場所',
-      data: 1,
-      type: 'text',
-      width: 150,
-    },
-    {
-      title: '区分',
-      data: 2,
-      type: 'dropdown',
-      source: ['', '集合', 'スタート', 'コンビニ', '観光', '休憩', 'ゴール', '銭湯', '打上げ'],
-      width: 100,
-      strict: false,
-      allowInvalid: false,
-      className: 'htCenter',
-    },
-    {
-      title: '距離(km)',
-      data: 3,
-      type: 'numeric',
-      numericFormat: {
-        pattern: '0.00',
-      },
-      width: 100,
-      validator: (value: any, callback: (valid: boolean) => void) => {
-        // 距離の検証ロジック（簡略化）
-        callback(value >= 0);
-      },
-    },
-    {
-      title: 'ペース(分/km)',
-      data: 4,
-      type: 'numeric',
-      numericFormat: {
-        pattern: '0.0',
-      },
-      width: 120,
-    },
-    {
-      title: '間隔(km)',
-      data: 5,
-      type: 'numeric',
-      numericFormat: {
-        pattern: '0.00',
-      },
-      width: 100,
-      readOnly: true,
-      className: 'htCenter htDimmed',
-    },
-    {
-      title: '休憩(分)',
-      data: 6,
-      type: 'numeric',
-      numericFormat: {
-        pattern: '0',
-      },
-      width: 100,
-    },
-    {
-      title: '日付',
-      data: 7,
-      readOnly: true,
-      width: 100,
-      className: 'htCenter htDimmed',
-    },
-    {
-      title: '到着',
-      data: 8,
-      readOnly: true,
-      width: 100,
-      className: 'htCenter htDimmed',
-    },
-    {
-      title: '出発',
-      data: 9,
-      readOnly: true,
-      width: 100,
-      className: 'htCenter htDimmed',
-    },
-  ];
-
-  const handleAfterChange = (changes: Handsontable.CellChange[] | null) => {
-    if (!changes) return;
-
-    changes.forEach(([row, prop, oldValue, newValue]) => {
-      if (oldValue !== newValue && row !== null && prop !== null) {
-        const checkpoint = checkpoints[row];
-        if (!checkpoint) return;
-
-        const fieldMap: { [key: number]: string } = {
-          1: 'name',
-          2: 'type',
-          3: 'distance',
-          4: 'pace',
-          5: 'interval',
-          6: 'restTime',
-        };
-
-        const field = fieldMap[prop as number];
-        if (field) {
-          onCheckpointChange(checkpoint.id, field, newValue);
+  // 全行の距離チェック処理
+  const checkAllRowsForDistanceErrors = () => {
+    if (!hotRef.current) return;
+    
+    const hotInstance = hotRef.current.hotInstance;
+    if (!hotInstance) return;
+    
+    const errorRows = new Set<number>();
+    const rowCount = hotInstance.countRows();
+    
+    // 3行目以降（インデックス2以降）をチェック
+    for (let row = 2; row < rowCount; row++) {
+      const currentDistance = hotInstance.getDataAtCell(row, 3);
+      const prevDistance = hotInstance.getDataAtCell(row - 1, 3);
+      
+      if (currentDistance !== null && prevDistance !== null && currentDistance < prevDistance) {
+        // エラーがある行のIDを取得してcheckpoints配列でのインデックスを取得
+        const rowId = hotInstance.getDataAtCell(row, 0);
+        const checkpointIndex = checkpoints.findIndex(cp => cp.id === rowId);
+        
+        if (checkpointIndex !== -1) {
+          errorRows.add(checkpointIndex);
         }
       }
-    });
+    }
+    setRowsWithError(errorRows);
   };
+
+  // デバウンス付きの全行チェック処理
+  // タイマーを使用する理由：
+  // 1. 連続した距離編集時の不要な処理実行を防止（パフォーマンス最適化）
+  // 2. React状態更新（setCheckpoints）との競合を回避
+  // 3. ユーザーの編集完了まで待機してから最終状態をチェック
+  // 4. 200msは一般的なタイピング間隔で、体感的に即座に反応する範囲
+  const debouncedCheckAllRows = () => {
+    // 既存のタイマーをクリア（新しい編集があった場合は前の処理をキャンセル）
+    if (recheckTimeoutRef.current) {
+      clearTimeout(recheckTimeoutRef.current);
+    }
+    
+    // 新しいタイマーを設定（200ms後に実行）
+    // これにより連続した編集の最後の変更から200ms後に1回だけチェックが実行される
+    recheckTimeoutRef.current = setTimeout(() => {
+      checkAllRowsForDistanceErrors();
+    }, 200);
+  };
+
+  const tableData = convertToTableData(checkpoints);
+  const columns = createColumnConfig(hotRef);
+  const handleAfterChange = createAfterChangeHandler(checkpoints, onCheckpointChange, debouncedCheckAllRows, hotRef);
+  const cellsRenderer = createCellsRenderer(checkpoints, hotRef, rowsWithError);
 
   return (
     <div className="handsontable-container relative z-10">
-      <style>{`
-        .handsontable-container {
-          margin: 20px 0;
-          position: relative;
-          z-index: 10;
-        }
-        
-        /* グリッドの基本背景を白に設定 */
-        .handsontable-container .handsontable td {
-          background-color: #ffffff !important;
-        }
-        
-        /* ヘッダーの背景色 */
-        .handsontable-container .handsontable .ht_clone_top th,
-        .handsontable-container .handsontable .ht_clone_left th,
-        .handsontable-container .handsontable .ht_clone_corner th {
-          background-color: #f9fafb !important;
-        }
-        
-        /* 区分に応じたセルの背景色 - セル単位で適用 */
-        .handsontable-container .handsontable td.has-error {
-          background-color: #fee2e2 !important;
-        }
-        
-        .handsontable-container .handsontable td.goal-row {
-          background-color: #fefce8 !important;
-        }
-        
-        .handsontable-container .handsontable td.meeting-row {
-          background-color: #f0fdf4 !important;
-        }
-        
-        .handsontable-container .handsontable td.start-row {
-          background-color: #eff6ff !important;
-        }
-        
-        /* 読み取り専用セルの背景色 */
-        .handsontable-container .handsontable td.htDimmed {
-          background-color: #f9fafb !important;
-          color: #6b7280 !important;
-        }
-        
-        /* 区分別 + 読み取り専用セルの組み合わせ */
-        .handsontable-container .handsontable td.goal-row.htDimmed {
-          background-color: #fef3c7 !important;
-        }
-        
-        .handsontable-container .handsontable td.meeting-row.htDimmed {
-          background-color: #dcfce7 !important;
-        }
-        
-        .handsontable-container .handsontable td.start-row.htDimmed {
-          background-color: #dbeafe !important;
-        }
-        
-        .handsontable-container .handsontable td.has-error.htDimmed {
-          background-color: #fecaca !important;
-        }
-      `}</style>
+      <style>{handsontableStyles}</style>
 
       <HotTable
         ref={hotRef}
@@ -254,43 +126,13 @@ const HandsontableSchedule: React.FC<HandsontableScheduleProps> = ({
           onAddCheckpoint();
         }}
         afterRowMove={(rows: number[], target: number) => {
-          // 行移動後にcheckpointsの順序を更新
-          console.log('Row moved:', rows, 'to', target);
-          if (onRowMove) {
-            onRowMove(rows, target);
-          }
+          // 行移動後に全行をチェック
+          checkAllRowsForDistanceErrors();
         }}
         afterColumnMove={(columns: number[], target: number) => {
-          // 列移動後の処理
-          console.log('Column moved:', columns, 'to', target);
+          // 列移動後の処理（現在は特別な処理なし）
         }}
-        cells={(row: number, col: number) => {
-          const checkpoint = checkpoints[row];
-          if (!checkpoint) return {};
-
-          let className = '';
-          
-          // 区分に応じたクラス名を追加
-          if (checkpoint.hasError) {
-            className += 'has-error ';
-          } else if (checkpoint.type === 'ゴール') {
-            className += 'goal-row ';
-          } else if (checkpoint.type === '集合') {
-            className += 'meeting-row ';
-          } else if (checkpoint.type === 'スタート') {
-            className += 'start-row ';
-          }
-
-          // 読み取り専用列にhtDimmedクラスを追加
-          const readOnlyColumns = [5, 7, 8, 9]; // 間隔、日付、到着、出発
-          if (readOnlyColumns.includes(col)) {
-            className += 'htDimmed ';
-          }
-
-          return {
-            className: className.trim(),
-          };
-        }}
+        cells={cellsRenderer}
       />
 
       <div className="mt-4 space-x-2">
