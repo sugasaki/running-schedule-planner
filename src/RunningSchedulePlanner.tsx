@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Play } from 'lucide-react';
 import type { Checkpoint } from './types';
 import type { RunningScheduleConfig } from './types/config';
 import { useTimeCalculations } from './hooks/useTimeCalculations';
 import { calculateTotalTime } from './utils/timeUtils';
-import HandsontableSchedule from './components/HandsontableSchedule';
+import DataGridSchedule from './components/DataGridSchedule';
 import { ConfigSelector } from './components/ConfigSelector';
 import { ConfigManager } from './services/ConfigManager';
 
@@ -20,7 +20,33 @@ const RunningSchedulePlanner = () => {
   });
 
   const [startDateTime, setStartDateTime] = useState(currentConfig.startDateTime);
-  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>(currentConfig.checkpoints);
+  const [rawCheckpoints, setRawCheckpoints] = useState<Checkpoint[]>(currentConfig.checkpoints.map(cp => ({
+    ...cp,
+    interval: 0 // 間隔は計算で導出するため、生データでは0で初期化
+  })));
+  
+  // 間隔を自動計算した完全なcheckpointsを導出（見た目の順序ベース）
+  const checkpoints = useMemo(() => {
+    return rawCheckpoints.map((checkpoint, index) => {
+      // IDが0または1の場合は間隔計算をスキップ（集合・スタート地点）
+      if (checkpoint.id <= 1) {
+        return { ...checkpoint, interval: 0 };
+      }
+
+      // 見た目の順序で前のチェックポイントを取得
+      if (index <= 0) {
+        return { ...checkpoint, interval: 0 };
+      }
+      
+      const prevCheckpoint = rawCheckpoints[index - 1];
+      const calculatedInterval = Number((checkpoint.distance - prevCheckpoint.distance).toFixed(2));
+
+      return {
+        ...checkpoint,
+        interval: Math.max(0, calculatedInterval)
+      };
+    });
+  }, [rawCheckpoints]);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // ConfigManagerの初期化とデフォルト設定の読み込み
@@ -45,7 +71,10 @@ const RunningSchedulePlanner = () => {
   // 設定が変更されたときにstateを更新
   useEffect(() => {
     setStartDateTime(currentConfig.startDateTime);
-    setCheckpoints(currentConfig.checkpoints);
+    setRawCheckpoints(currentConfig.checkpoints.map(cp => ({
+      ...cp,
+      interval: 0 // 間隔は計算で導出するため、生データでは0で初期化
+    })));
   }, [currentConfig.id]); // idが変わった時のみ更新（プリセット切り替え時）
 
   // checkpointsまたはstartDateTimeが変更されたときにcurrentConfigを更新
@@ -97,58 +126,70 @@ const RunningSchedulePlanner = () => {
 
 
   const addCheckpoint = () => {
-    const newId = Math.max(...checkpoints.map(cp => cp.id)) + 1;
-    setCheckpoints(prev => [...prev, {
+    const newId = Math.max(...rawCheckpoints.map(cp => cp.id)) + 1;
+    setRawCheckpoints(prev => [...prev, {
       id: newId,
       name: '新しいチェックポイント',
       type: '' as const,
       distance: 0,
       pace: 10,
-      interval: 0,
+      interval: 0, // useMemoで自動計算されるため、ここでは0
       restTime: 5,
     }]);
   };
 
   const handleCheckpointChange = (id: number, field: string, value: string | number) => {
-    setCheckpoints(prev => {
-      const updatedCheckpoints = prev.map(cp =>
-        cp.id === id
-          ? {
-            ...cp,
-            [field]: ['distance', 'pace', 'interval', 'restTime'].includes(field)
-              ? Number(value)
-              : value,
-          }
-          : cp
-      );
-
-      const changedIndex = updatedCheckpoints.findIndex(cp => cp.id === id);
-
-      if (field === 'distance') {
-        if (changedIndex > 1 && changedIndex < updatedCheckpoints.length - 1) {
-          const nextCheckpoint = updatedCheckpoints[changedIndex + 1];
-          if (nextCheckpoint) {
-            const newInterval = Number((nextCheckpoint.distance - Number(value)).toFixed(2));
-            if (newInterval > 0) {
-              updatedCheckpoints[changedIndex + 1] = {
-                ...nextCheckpoint,
-                interval: newInterval
-              };
-            }
-          }
+    setRawCheckpoints(prev => prev.map(cp =>
+      cp.id === id
+        ? {
+          ...cp,
+          [field]: ['distance', 'pace', 'interval', 'restTime'].includes(field)
+            ? Number(value)
+            : value,
         }
-      }
+        : cp
+    ));
+  };
 
-      // ペース変更時または休憩時間変更時は、該当行から最終行までの時間計算を強制的に再実行
-      // useTimeCalculationsフックが自動的に再計算するため、ここでは変更を記録するだけ
-      if (field === 'pace' || field === 'restTime') {
-        // 時間計算は useTimeCalculations フックで自動的に再実行される
-        // changedIndexから最終行までが影響を受ける
-        console.log(`${field}が変更されました。行${changedIndex}から最終行まで再計算されます。`);
-      }
+  const handleRemoveCheckpoint = (id: number) => {
+    setRawCheckpoints(prev => prev.filter(cp => cp.id !== id));
+  };
 
-      return updatedCheckpoints;
+  const handleReorderCheckpoints = (newOrder: number[]) => {
+    setRawCheckpoints(prev => {
+      // 新しい順序の妥当性をチェック
+      if (!newOrder || newOrder.length !== prev.length) {
+        console.warn('Invalid reorder attempt:', newOrder);
+        return prev;
+      }
+      
+      // 現在の順序と同じ場合は変更しない
+      const currentOrder = prev.map(cp => cp.id);
+      if (JSON.stringify(currentOrder) === JSON.stringify(newOrder)) {
+        return prev;
+      }
+      
+      // 全てのIDが存在することを確認
+      const allIdsExist = newOrder.every(id => prev.some(cp => cp.id === id));
+      if (!allIdsExist) {
+        console.warn('Missing IDs in reorder:', newOrder);
+        return prev;
+      }
+      
+      // 新しい順序でcheckpointsを並び替え
+      const reordered = newOrder.map(id => 
+        prev.find(cp => cp.id === id)!
+      );
+      
+      console.log('Reordering checkpoints:', currentOrder, '->', newOrder);
+      return reordered;
     });
+  };
+
+  const handleRecalculate = () => {
+    // 表コンポーネントの再描画を強制的にトリガー（データは変更せず）
+    setStartDateTime(prev => prev);
+    console.log('全行再計算を実行しました');
   };
 
 
@@ -171,25 +212,37 @@ const RunningSchedulePlanner = () => {
         )}
 
         <div className="bg-blue-50 p-4 rounded-lg mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            スタート日時
-          </label>
-          <input
-            type="datetime-local"
-            value={startDateTime}
-            onChange={(e) => {
-              setStartDateTime(e.target.value);
-            }}
-            className="w-48"
-          />
+          <div className="flex items-end gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                スタート日時
+              </label>
+              <input
+                type="datetime-local"
+                value={startDateTime}
+                onChange={(e) => {
+                  setStartDateTime(e.target.value);
+                }}
+                className="w-48"
+              />
+            </div>
+            <button
+              onClick={handleRecalculate}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+            >
+              🔄 全行再計算
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="relative z-10">
-        <HandsontableSchedule
+        <DataGridSchedule
           checkpoints={calculateTimes}
           onCheckpointChange={handleCheckpointChange}
           onAddCheckpoint={addCheckpoint}
+          onRemoveCheckpoint={handleRemoveCheckpoint}
+          onReorderCheckpoints={handleReorderCheckpoints}
         />
       </div>
 

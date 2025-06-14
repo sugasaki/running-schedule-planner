@@ -178,7 +178,7 @@ export const ConfigSelector: React.FC<ConfigSelectorProps> = ({
                                     <div className="text-xs text-gray-600 mt-1">{preset.description}</div>
                                     <div className="text-xs text-blue-600 mt-1">
                                         {preset.config.checkpoints.length}箇所 |
-                                        {preset.config.checkpoints[preset.config.checkpoints.length - 1]?.distance || 0}km
+                                        {Math.max(...preset.config.checkpoints.map(cp => cp.distance))}km
                                     </div>
                                 </div>
                                 {preset.category === 'custom' && (
